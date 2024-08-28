@@ -1,0 +1,74 @@
+{
+  "posts": [
+    {
+      "posts": [
+        {
+          "title": "This is my first Tech Blog",
+          "id": "013d9cbb-9a4c-4973-b773-601059a9dea8",
+          "userId": "0001",
+          "content": "This is used for testing the json server.",
+          "comments": [
+            {
+              "content": "What a great blog!",
+              "timestamp": "26/01/2024, 16:07:37",
+              "id": "0001",
+              "userId": "0002"
+            },
+            {
+              "id": "c63758ec-2180-44ee-b4b9-2212a4fccb24",
+              "userId": "0002",
+              "content": "test",
+              "timestamp": "27/01/2024, 18:39:40"
+            }
+          ]
+        }
+      ],
+      "id": "1"
+    },
+    {
+      "users": [
+        {
+          "id": "0001",
+          "email": "johnDoe@gmail.com",
+          "password": "1234"
+        },
+        {
+          "id": "0002",
+          "email": "demo@example.com",
+          "password": "demo123"
+        },
+        {
+          "id": "a0493734-2237-48cd-a840-44df12658ae3",
+          "email": "mike@gmail.com",
+          "password": "123"
+        },
+        {
+          "id": "32a3a575-26d5-4486-9427-5524e8d38550",
+          "email": "joe@gmail.com",
+          "password": "joe123"
+        },
+        {
+          "id": "291c4036-d96f-4eb9-b27c-15eba06f9948",
+          "email": "lalala@gmail.com",
+          "password": "lalala"
+        },
+        {
+          "id": "d84949c5-5605-46d9-8274-ab51ef402ca1",
+          "email": "op@gmail.com",
+          "password": "op"
+        },
+        {
+          "id": "a8ec9b4a-6e52-4913-a587-47b2976dbf59",
+          "email": "abc@gmail.com",
+          "password": "abc"
+        },
+        {
+          "id": "695999e0-f813-40a9-9552-add60f949c38",
+          "email": "amy@gmail.com",
+          "password": "amy123"
+        }
+      ],
+      "id": "2"
+    }
+  ]
+}

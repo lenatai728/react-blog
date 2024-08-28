@@ -1,0 +1,90 @@
+.signup-page {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.signup-page > .signup-container {
+    margin: 60px;
+    width: 540px;
+    height: inherit;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border: 2px solid black;
+    box-shadow: 0 4px 8px rgba(0,0,0,.3);
+    border-radius: 10px;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.signup-container > h2 {
+    font-size: 30px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 50px;
+    width: 100%;
+    padding: 10px 0;
+    border-bottom: 2px solid rgba(255,255,255,.3);
+}
+.signup-container > .signup-email {
+    width: 100%;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.signup-container > .signup-password {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.signup-container input {
+    width: 100%;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+}
+.signup-container input:focus {
+    border: 2.2px solid #00d4ff;
+}
+.signup-login-link {
+    margin-bottom: 50px;
+    /* width: 80%; */
+}
+.signup-login-link a {
+    color: #fff;
+    text-underline-offset: 5px;
+    transition: text-decoration .5 ease-out;
+}
+.signup-login-link a:hover {
+    text-decoration: underline;
+}
+.signup-btn {
+    width: 100%;
+}
+.signup-btn button {
+    width: 100%;
+    /* background-color: rgb(98, 98, 215); */
+    background-color: #fff;
+    color: var(--primary-color);
+    font-size: 16px;
+    font-weight: 400;
+    padding: 10px 50px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+.signup-btn button:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+    outline: 1px solid #fff;
+    /* filter: brightness(.8); */
+    transition: all .1 ease-out;
+}
+.signup-btn button:active {
+    filter: brightness(.75);
+    transition: all .1 ease-out;
+}
