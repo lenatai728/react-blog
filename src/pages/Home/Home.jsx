@@ -3,18 +3,21 @@ import { Link } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import Post from './components/Post'
 import './home.css'
+import { useSelector } from 'react-redux'
 
 
-const Home = ({ posts, users, currentUser, setCurrentUser }) => {
+const Home = () => {
+  // REDUX
+  const { posts } = useSelector(state => state.posts)
 
   return (
     <div className='home'>
-      <Navbar Link={Link} title="Tech blog" homeActive currentUser={currentUser} setCurrentUser={setCurrentUser} />
+      <Navbar Link={Link} title="Tech blog" homeActive />
       <div className="home-posts">
         {
           posts?.map(post => (
             <div className="home-post" key={post.id}>
-              <Post post={post} users={users} />
+              <Post post={post} />
             </div>
           ))
         }

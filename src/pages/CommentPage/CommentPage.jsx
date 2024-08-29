@@ -1,42 +1,50 @@
 import React, { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import Post from '../Home/components/Post'
-import { v4 as uuidv4 } from 'uuid';
-import './commentPage.css'
-import Comment from './components/Comment';
 import { useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { Timestamp } from 'firebase/firestore';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSubmittingStatus } from '../../slices/postsSlice';
+import Post from '../Home/components/Post'
+import Comment from './components/Comment';
+import './commentPage.css'
 
-const CommentPage = ({ posts, users, currentUser, setComments, comments, setCommentStatus, setTimestamp, timestamp, updateCommentsToFirebase }) => {
+const CommentPage = ({ updateCommentsToFirebase, comments, setComments }) => {
     const { postId } = useParams()
-    const targetPost = posts.find(post => post.id === postId)
+    const { posts, submittingStatus } = useSelector(state => state.posts)
+    const dispatch = useDispatch()
 
+    const { users, currentUser } = useSelector(state => state.users)
+    const targetPost = posts.find((post) => post.id === postId);
     const [comment, setComment] = useState("")
 
-
     useEffect(() => {
+        if(submittingStatus) return;
+        console.log('targetPost: ',targetPost)
         setComments(targetPost?.comments)
-    }, [setComments, targetPost])
+    }, [targetPost])
 
     const handleSendClick = async () => {
-        setCommentStatus(true)
-        setTimestamp(new Date())
+        dispatch(setSubmittingStatus(true))
+        if(!currentUser) console.log('Cannot comment: You have not logged in')
+        const time = Date.now()
+        let timestamp = new Date(time)
+
         const newComment = {
             id: uuidv4(),
-            userId: currentUser.id,
+            userId: currentUser?.id,
             content: comment,
             timestamp: timestamp.toLocaleString(),
             createdAt: Timestamp.now()
         }
         // handleCreateComment
-        const newComments = [...comments, newComment]
-        targetPost.comments = newComments
         setComments(prevComments => [...prevComments, newComment])
+        const newComments = [...comments, newComment]
         setComment("")
-
         // save comments to the firebase
         updateCommentsToFirebase(targetPost.id, newComments)
     }
+
     return (
         <div className='comment-page'>
             {
@@ -45,15 +53,13 @@ const CommentPage = ({ posts, users, currentUser, setComments, comments, setComm
                         <Post post={targetPost} users={users} />
                         <div className="comment-input-container">
                             <p>Comment: </p>
-                            {/* <input type="text" onChange={e => setComment(e.target.value)} value={comment} /> */}
                             <textarea type="text" onChange={e => setComment(e.target.value)} value={comment} wrap="soft" />
                             <button onClick={handleSendClick}>send</button>
                         </div>
-
-                        {/* Comment component */}
+                        {/* COMMENT COMPONENT */}
                         {
                             comments?.map(comment => (
-                                <Comment key={comment.id} post={targetPost} users={users} comment={comment} />
+                                <Comment key={comment.id} post={targetPost} comment={comment} />
                             ))
                         }
                     </div>

@@ -1,6 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { browserLocalPersistence, getAuth, setPersistence } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCk0rR6wb4JsKp6N7Anozq4ObGa-QiNVTg",
@@ -13,14 +12,16 @@ const firebaseConfig = {
 };
 
 const firebaseApp = initializeApp(firebaseConfig)
+
 const db = getFirestore(firebaseApp)
 
-// change user login expire time
-const auth = getAuth(firebaseApp);
-setPersistence(auth, browserLocalPersistence, { 
-  // Set custom session duration
-  expiresIn: 15 * 60 * 1000, //  15 minutes in milliseconds
-});
+// TESTING
+// Connect to Firestore emulator
+// if (window.location.hostname === 'localhost') {
+//   connectFirestoreEmulator(db, 'localhost', 8080);
+//   console.log('Connected to Firestore emulator');
+// }
+
 
 export default db;
 

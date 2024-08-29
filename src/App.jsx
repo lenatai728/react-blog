@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import './app.css'
-import { API_GET_POSTS, API_GET_USERS } from './global/constants'
 import CreatePost from './pages/CreatePost/CreatePost'
 import Dashboard from './pages/Dashboard/Dashboard'
 import Home from './pages/Home/Home'
@@ -9,187 +8,101 @@ import LoginPage from './pages/LoginPage/LoginPage'
 import Footer from './components/Footer'
 import SignUpPage from './pages/SignUpPage/SignUpPage'
 import CommentPage from './pages/CommentPage/CommentPage'
-import db from './firebase'
-import { collection, getDocs, writeBatch, doc, query, orderBy, updateDoc, getDoc } from 'firebase/firestore'
 
-// @ Functions to fetch post from Firestore
-async function fetchPostsFromFirestore(setPosts) {
-  try {
-    const postsRef = collection(db, 'posts')
-    const q = query(postsRef, orderBy('createdAt'))
-    const postsSnapshot = await getDocs(q)
-    const posts = postsSnapshot.docs.map(doc => doc.data());
-    setPosts(posts);
-  } catch (error) {
-    console.log('Error fetching data:', error);
+import db from './firebase'
+import { collection, getDocs, doc, query, orderBy, updateDoc, getDoc } from 'firebase/firestore'
+
+import { useDispatch, useSelector } from 'react-redux'
+import { setCurrentUser, setUsers } from './slices/usersSlice'
+import { setPosts, setSubmittingStatus } from './slices/postsSlice'
+
+// @Functions to fetch data from Firestore
+const fetchPostsFromFirestore = () => {
+  return async (dispatch) => {
+    try {
+      const postsRef = collection(db, 'posts')
+      const q = query(postsRef, orderBy('createdAt'))
+      const postsSnapshot = await getDocs(q)
+      const posts = postsSnapshot.docs.map(doc => doc.data());
+      dispatch(setPosts(posts))
+    } catch (error) {
+      console.log('Error fetching data:', error);
+    }
   }
 }
-async function fetchUsersFromFirestore(setUsers) {
-  try {
-    const usersSnapshot = await getDocs(collection(db, 'users'));
-    const users = usersSnapshot.docs.map(doc => doc.data())
-    setUsers(users)
-    // const users = []
-    // onSnapshot.forEach(doc => {
-    //   users.push(doc.data())
-    //   setUsers(users)
-    // })
-  } catch (error) {
-    console.log('Error fetching data:', error);
+const fetchUsersFromFirestore = () => {
+  return async (dispatch) => {
+    try {
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      const users = usersSnapshot.docs.map(doc => doc.data())
+      dispatch(setUsers(users))
+    } catch (error) {
+      console.log('Error fetching data:', error);
+    }
   }
 }
-async function updateCollectionInFirestore(collectionName, documents) {
+// @Function to update/PUT comments field in firestore document
+async function updateCommentsToFirebase(targetPostId, newComments) {
+  let docId;
+  const postsCollectionRef = collection(db, 'posts');
+  // find target document id
   try {
-    const collectionRef = collection(db, collectionName);
-    const batch = writeBatch(db);
-    documents.forEach(document => {
-      // add into firebase
-      const docRef = doc(collectionRef, document.id);
-      batch.set(docRef, document);
+    const querySnapshot = await getDocs(postsCollectionRef);
+    querySnapshot.forEach((doc) => {
+      if (String(doc.data().id) === targetPostId) {
+        docId = String(doc.id);
+      }
     });
-    await batch.commit();
-    console.log('Collection updated: ', collectionName);
   } catch (error) {
-    console.error('Error updating collection: ', error);
+    console.error('Error fetching documents:', error);
   }
-}
-// update comments field
-async function updateCommentsToFirebase(docId, newComments) {
+  // update field in the document
   const docRef = doc(db, 'posts', docId);
   const docSnapshot = await getDoc(docRef);
-
   if (docSnapshot.exists()) {
-    updateDoc(docRef, { comments: newComments })
-      .then(() => {
-        console.log('Field value updated successfully');
-      })
-      .catch((error) => {
-        console.error('Error updating field value:', error);
-      });
+    try {
+      await updateDoc(docRef, { comments: newComments });
+      console.log('Field value updated successfully');
+    } catch (error) {
+      console.error('Error updating field value:', error.code, error.message);
+    }
   }
 }
 
 const App = () => {
-  const [posts, setPosts] = useState([])
-  const [submittingStatus, setSubmittingStatus] = useState(false)
-  const [users, setUsers] = useState([])
-  const [timestamp, setTimestamp] = useState(new Date())
-
-  // backup for user login
-  // const storedUser = localStorage.getItem("currentUser")
-  // const storedUserId = JSON.parse(localStorage.getItem("currentUserId"))
-  // const storedUser = users.find(user => user.id === storedUserId)
-  // const initialUser = storedUser ?  JSON.parse(storedUser) : null;
-  // const initialUser = storedUser ?  storedUser : null;
-  const [currentUser, setCurrentUser] = useState(null)
-  // useEffect(() => {
-  //   const storedUserId = JSON.parse(localStorage.getItem("currentUserId"));
-  //   const storedUser = users.find(user => user.id === storedUserId);
-  //   const initialUser = storedUser || null;
-  //   setCurrentUser(initialUser);
-  // }, [users]);
-
-  const [signupStatus, setSignupStatus] = useState(false)
-  // comment feature
-  const [commentStatus, setCommentStatus] = useState(false)
   const [comments, setComments] = useState([])
-  // const handleCreateComment = (newComment) => {
-  //   setComments(prevComments => [...prevComments, newComment])
-  //   console.log("handleCreateComment executed")
-  // }
+  const { submittingStatus } = useSelector(state => state.posts)
+  const dispatch = useDispatch();
 
-  const handleCreatePost = (newPost) => {
-    setSubmittingStatus(true);
-    setPosts((prevPosts) => [...prevPosts, newPost]);
-  }
-  // signup feature
-  const handleSignUpUser = (newUser) => {
-    setSignupStatus(true)
-    setUsers(prevUsers => [...prevUsers, newUser])
-  }
-  // login feature
+  // LOGIN FEATURE
   const handleAuthenticateUser = (email, password) => {
-    const user = users.find(user => user.email === email && user.password === password)
-    if (user) {
-      setCurrentUser(user)
-      // localStorage.setItem("currentUser", JSON.stringify(user))
-      // localStorage.setItem("currentUserId", JSON.stringify(user.id))
-    }
-    else {
-      setCurrentUser(null)
-      // localStorage.setItem("currentUser", null)
-      // localStorage.setItem("currentUserId", null)
+    return (dispatch, getState) => {
+      const { users } = getState().users
+      const user = users.find(user => user.email === email && user.password === password)
+      dispatch(setCurrentUser(user || null))
     }
   }
-
-  // useEffect(() => {
-  //   // fetchAPI(setPosts)
-  //   fetchPostsFromFirestore(setPosts)
-  //   // fetchUsers(setUsers)
-  //   // no need because the below useEffect already did the job
-  //   // fetchUsersFromFirestore(setUsers)
-  // }, [])
+  // USE EFFECTS
   useEffect(() => {
-    // if (!submittingStatus) {
-    //   return
-    // }
-    // fetchSetPosts(posts)
-    //   .then(posts => setSubmittingStatus(false))
-    //   .catch(err => console.log(err))
+    dispatch(fetchPostsFromFirestore(setPosts))
+      .then(() => dispatch(setSubmittingStatus(false)))
+  }, [dispatch, submittingStatus])
 
-    // updateCollectionInFirestore('posts', posts)
-    //   .then(posts => setSubmittingStatus(false))
-
-    fetchPostsFromFirestore(setPosts)
-      .then(posts => setSubmittingStatus(false))
-  
-  }, [posts, submittingStatus])
-  // useEffect(() => {
-  //   if (!signupStatus) {
-  //     return
-  //   }
-  //   fetchSetUsers(users)
-  //     .then(users => setSignupStatus(false))
-  //     .catch(err => console.log(err))
-  // }, [users, signupStatus])
   useEffect(() => {
-    fetchUsersFromFirestore(setUsers)
-      .then(users => setSignupStatus(false))
-  }, [users, signupStatus])
-
-  // comment
-  // useEffect(() => {
-  //   if (!commentStatus) {
-  //     return
-  //   }
-  //   fetchSetPosts(posts)
-  //     .then(posts => setSubmittingStatus(false))
-  //     .catch(err => console.log(err))
-  //     .then(posts => setSubmittingStatus(false))
-  // }, [posts, commentStatus])
-
-  // backup login
-  // useEffect(() => {
-  //   const auth = getAuth();
-  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
-  //     setCurrentUser(user);
-  //   });
-  //   return () => {
-  //     unsubscribe();
-  //   };
-  // }, []);
+    dispatch(fetchUsersFromFirestore(setUsers));
+  }, [dispatch])
 
   return (
     <div className='wrapper'>
       <div className="main-container">
         <BrowserRouter>
           <Routes>
-            <Route path='/' element={<Home posts={posts} currentUser={currentUser} users={users} setCurrentUser={setCurrentUser} />}></Route>
-            <Route path='/dashboard' element={<Dashboard Link={Link} currentUser={currentUser} posts={posts} users={users} />}></Route>
-            <Route path='/create-post' element={<CreatePost Link={Link} posts={posts} setPosts={setPosts} handleCreatePost={handleCreatePost} currentUser={currentUser} setCurrentUser={setCurrentUser} submittingStatus={submittingStatus} setTimestamp={setTimestamp} timestamp={timestamp} setSubmittingStatus={setSubmittingStatus} />}></Route>
-            <Route path='/login' element={<LoginPage Link={Link} handleAuthenticateUser={handleAuthenticateUser} currentUser={currentUser} setCurrentUser={setCurrentUser} />}></Route>
-            <Route path='/signup' element={<SignUpPage Link={Link} handleSignUpUser={handleSignUpUser} currentUser={currentUser} setCurrentUser={setCurrentUser} users={users} />}></Route>
-            <Route path='/comments/:postId' element={<CommentPage posts={posts} users={users} currentUser={currentUser} setComments={setComments} comments={comments} setCommentStatus={setCommentStatus} setTimestamp={setTimestamp} timestamp={timestamp} updateCommentsToFirebase={updateCommentsToFirebase} />}></Route>
+            <Route path='/' element={<Home />}></Route>
+            <Route path='/dashboard' element={<Dashboard Link={Link} />}></Route>
+            <Route path='/create-post' element={<CreatePost Link={Link} />}></Route>
+            <Route path='/login' element={<LoginPage Link={Link} handleAuthenticateUser={handleAuthenticateUser} />}></Route>
+            <Route path='/signup' element={<SignUpPage Link={Link} />}></Route>
+            <Route path='/comments/:postId' element={<CommentPage setComments={setComments} comments={comments} updateCommentsToFirebase={updateCommentsToFirebase} />}></Route>
           </Routes>
           <Footer />
         </BrowserRouter>

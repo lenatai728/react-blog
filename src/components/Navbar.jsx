@@ -1,16 +1,14 @@
-import { getAuth, signOut } from 'firebase/auth'
 import React from 'react'
 import './navbar.css'
-const Navbar = ({ Link, title, homeActive, dashboardActive, currentUser, setCurrentUser }) => {
+import { useDispatch, useSelector } from 'react-redux'
+import { setCurrentUser } from '../slices/usersSlice'
+const Navbar = ({ Link, title, homeActive, dashboardActive }) => {
+    //  REDUX
+    const { currentUser } = useSelector(state => state.users)
+    const dispatch = useDispatch()
+
     const handleLogoutClick = async () => {
-        // const auth = getAuth()
-        // try {
-        //     signOut(auth)
-        //     setCurrentUser(null)
-        // } catch (error) { console.log(error) }
-        setCurrentUser(null)
-        // localStorage.setItem("currentUser", null)
-        // localStorage.setItem("currentUserId", null)
+        dispatch(setCurrentUser(null))
     }
     return (
         <div className='navbar'>
@@ -25,10 +23,10 @@ const Navbar = ({ Link, title, homeActive, dashboardActive, currentUser, setCurr
                             <Link to="/login" className={`nav-link ${dashboardActive && `nav-link--active`}`}>Dashboard</Link>
                         )
                     }
-                   
+
                     {
                         currentUser ? (
-                             <div className="nav-logout">
+                            <div className="nav-logout">
                                 <button className="nav-login-btn" onClick={handleLogoutClick}>Log out</button>
                                 <span className="nav-logout-nametag">Logged in as {currentUser?.email?.split("@")[0]}</span>
                             </div>

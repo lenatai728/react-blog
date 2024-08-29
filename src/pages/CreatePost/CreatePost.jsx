@@ -5,15 +5,25 @@ import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import db from '../../firebase';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSubmittingStatus } from '../../slices/postsSlice';
 
-const CreatePost = ({ Link, posts, handleCreatePost, currentUser, submittingStatus, setTimestamp, timestamp, setCurrentUser, setSubmittingStatus }) => {
+const CreatePost = ({ Link }) => {
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
+
+    // REDUX
+    const { currentUser } = useSelector(state => state.users)
+    const { posts, submittingStatus } = useSelector(state => state.posts)
+    const dispatch = useDispatch()
+
     const navigate = useNavigate()
 
     const handleCreate = () => {
-        if(title === "" && content === "") return;
-        setTimestamp(new Date())
+        if (title === "" && content === "") return;
+        const time = Date.now()
+        let timestamp = new Date(time)
+
         const newPost = {
             id: uuidv4(),
             title: title,
@@ -23,17 +33,17 @@ const CreatePost = ({ Link, posts, handleCreatePost, currentUser, submittingStat
             timestamp: timestamp.toLocaleString(),
             createdAt: Timestamp.now()
         }
-        // handleCreatePost(newPost)
-        setSubmittingStatus(true)
+        
+        dispatch(setSubmittingStatus(true))
         addDoc(collection(db, 'posts'), newPost)
     }
-    useEffect(()=>{
-        if(!submittingStatus) return
+    useEffect(() => {
+        if (!submittingStatus) return;
         navigate('/')
     }, [posts, navigate, submittingStatus])
     return (
         <div className='create-post'>
-            <Navbar Link={Link} title="Write Your Blog" currentUser={currentUser} setCurrentUser={setCurrentUser} dashboardActive />
+            <Navbar Link={Link} title="Write Your Blog" dashboardActive />
             <div className='create-post-form'>
                 <div className="create-post-header">
                     <h2>New Blog</h2>

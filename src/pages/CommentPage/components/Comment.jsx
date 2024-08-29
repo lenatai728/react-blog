@@ -1,8 +1,9 @@
 import React from 'react'
 import './comment.css'
+import { useSelector } from 'react-redux'
 
-const Comment = ({ users, comment }) => {
-   
+const Comment = ({ comment }) => {
+    const { users } = useSelector(state => state.users)
     return (
         <div key={comment.id} className='comment-display-container'>
             <div className="comment-header">
