@@ -1,32 +1,31 @@
 import React, { useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid';
 import { Timestamp } from 'firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSubmittingStatus } from '../../slices/postsSlice';
+import { setPosts } from '../../slices/postsSlice';
 import Post from '../Home/components/Post'
 import Comment from './components/Comment';
 import './commentPage.css'
 
-const CommentPage = ({ updateCommentsToFirebase, comments, setComments }) => {
+const CommentPage = ({ updateCommentsToFirebase, fetchPostsFromFirestore }) => {
     const { postId } = useParams()
-    const { posts, submittingStatus } = useSelector(state => state.posts)
+    const { posts } = useSelector(state => state.posts)
     const dispatch = useDispatch()
 
     const { users, currentUser } = useSelector(state => state.users)
     const targetPost = posts.find((post) => post.id === postId);
     const [comment, setComment] = useState("")
 
-    useEffect(() => {
-        if(submittingStatus) return;
-        console.log('targetPost: ',targetPost)
-        setComments(targetPost?.comments)
-    }, [targetPost])
+    const navigate = useNavigate()
 
     const handleSendClick = async () => {
-        dispatch(setSubmittingStatus(true))
-        if(!currentUser) console.log('Cannot comment: You have not logged in')
+        if (!currentUser) {
+            alert('Login to comment!')
+            navigate('/login')
+            return;
+        }
+        setComment("")
         const time = Date.now()
         let timestamp = new Date(time)
 
@@ -37,12 +36,14 @@ const CommentPage = ({ updateCommentsToFirebase, comments, setComments }) => {
             timestamp: timestamp.toLocaleString(),
             createdAt: Timestamp.now()
         }
-        // handleCreateComment
-        setComments(prevComments => [...prevComments, newComment])
-        const newComments = [...comments, newComment]
-        setComment("")
         // save comments to the firebase
-        updateCommentsToFirebase(targetPost.id, newComments)
+        const newComments = [...targetPost.comments, newComment]
+        await updateCommentsToFirebase(targetPost.id, newComments)
+        // fetch posts from Firestore after the backend update is done
+        dispatch(fetchPostsFromFirestore(setPosts))
+            .catch(error => {
+                console.error('Error fetching posts:', error);
+            })
     }
 
     return (
@@ -58,7 +59,7 @@ const CommentPage = ({ updateCommentsToFirebase, comments, setComments }) => {
                         </div>
                         {/* COMMENT COMPONENT */}
                         {
-                            comments?.map(comment => (
+                            posts.find((post) => post.id === postId)?.comments?.map(comment => (
                                 <Comment key={comment.id} post={targetPost} comment={comment} />
                             ))
                         }

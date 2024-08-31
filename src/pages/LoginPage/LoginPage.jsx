@@ -30,11 +30,17 @@ const LoginPage = ({ Link, handleAuthenticateUser }) => {
         <div className="login-container">
           <h2>Login</h2>
           <div className="login-email">
-            <input type="email" placeholder='Email' onChange={e => setEmail(e.target.value)} value={email} />
+            <input
+              required={true}
+              type="email" placeholder='Email' onChange={e => setEmail(e.target.value)} value={email}
+            />
             <i className='bx bx-at'></i>
           </div>
           <div className="login-password">
-            <input type="password" placeholder='Password' onChange={e => setPassword(e.target.value)} value={password} />
+            <input
+              required={true}
+              type="password" placeholder='Password' onChange={e => setPassword(e.target.value)} value={password}
+            />
             <i className='bx bx-lock-alt' ></i>
           </div>
           <div className="login-signup-link">

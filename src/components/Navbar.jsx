@@ -28,10 +28,10 @@ const Navbar = ({ Link, title, homeActive, dashboardActive }) => {
                         currentUser ? (
                             <div className="nav-logout">
                                 <button className="nav-login-btn" onClick={handleLogoutClick}>Log out</button>
-                                <span className="nav-logout-nametag">Logged in as {currentUser?.email?.split("@")[0]}</span>
+                                <span className="nav-logout-nametag">USERNAME: {currentUser?.email?.split("@")[0]} </span>
                             </div>
                         ) : (
-                            <Link to="/login"><button className="nav-login-btn">Log in</button></Link>
+                            <Link to="/login"><button className="nav-login-btn">Login</button></Link>
                         )
                     }
 

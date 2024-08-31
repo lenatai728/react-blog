@@ -26,6 +26,9 @@
     margin-left: 8px;
     cursor: pointer;
 }
+.post-comments i:hover {
+    color: lightblue;
+}
 .post-content {
     padding: 15px;
     display: flex;

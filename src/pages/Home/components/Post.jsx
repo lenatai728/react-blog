@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import './post.css'
 import { useSelector } from 'react-redux';
 const Post = ({ post }) => {
-  // REDUX
   const { users } = useSelector(state => state.users)
 
   let theUser = null;
@@ -12,6 +11,7 @@ const Post = ({ post }) => {
       theUser = user
     }
   })
+  
   return (
     <div className='post'>
       <div className="post-header">

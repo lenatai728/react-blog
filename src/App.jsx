@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import './app.css'
 import CreatePost from './pages/CreatePost/CreatePost'
@@ -10,13 +10,13 @@ import SignUpPage from './pages/SignUpPage/SignUpPage'
 import CommentPage from './pages/CommentPage/CommentPage'
 
 import db from './firebase'
-import { collection, getDocs, doc, query, orderBy, updateDoc, getDoc } from 'firebase/firestore'
+import { collection, getDocs, query, orderBy, doc, getDoc, updateDoc } from 'firebase/firestore'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { setCurrentUser, setUsers } from './slices/usersSlice'
 import { setPosts, setSubmittingStatus } from './slices/postsSlice'
 
-// @Functions to fetch data from Firestore
+// @Async functions to fetch data from Firestore
 const fetchPostsFromFirestore = () => {
   return async (dispatch) => {
     try {
@@ -41,7 +41,7 @@ const fetchUsersFromFirestore = () => {
     }
   }
 }
-// @Function to update/PUT comments field in firestore document
+// @Async function to update/PUT comments field in firestore document
 async function updateCommentsToFirebase(targetPostId, newComments) {
   let docId;
   const postsCollectionRef = collection(db, 'posts');
@@ -68,20 +68,18 @@ async function updateCommentsToFirebase(targetPostId, newComments) {
     }
   }
 }
+// LOGIN FEATURE
+const handleAuthenticateUser = (email, password) => {
+  return (dispatch, getState) => {
+    const { users } = getState().users
+    const user = users.find(user => user.email === email && user.password === password)
+    dispatch(setCurrentUser(user || null))
+  }
+}
 
 const App = () => {
-  const [comments, setComments] = useState([])
   const { submittingStatus } = useSelector(state => state.posts)
   const dispatch = useDispatch();
-
-  // LOGIN FEATURE
-  const handleAuthenticateUser = (email, password) => {
-    return (dispatch, getState) => {
-      const { users } = getState().users
-      const user = users.find(user => user.email === email && user.password === password)
-      dispatch(setCurrentUser(user || null))
-    }
-  }
   // USE EFFECTS
   useEffect(() => {
     dispatch(fetchPostsFromFirestore(setPosts))
@@ -102,7 +100,7 @@ const App = () => {
             <Route path='/create-post' element={<CreatePost Link={Link} />}></Route>
             <Route path='/login' element={<LoginPage Link={Link} handleAuthenticateUser={handleAuthenticateUser} />}></Route>
             <Route path='/signup' element={<SignUpPage Link={Link} />}></Route>
-            <Route path='/comments/:postId' element={<CommentPage setComments={setComments} comments={comments} updateCommentsToFirebase={updateCommentsToFirebase} />}></Route>
+            <Route path='/comments/:postId' element={<CommentPage updateCommentsToFirebase={updateCommentsToFirebase} fetchPostsFromFirestore={fetchPostsFromFirestore} />}></Route>
           </Routes>
           <Footer />
         </BrowserRouter>

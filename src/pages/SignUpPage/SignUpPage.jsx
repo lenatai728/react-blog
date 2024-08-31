@@ -42,10 +42,16 @@ const SignUpPage = ({ Link }) => {
                 <div className="signup-container">
                     <h2>Sign up</h2>
                     <div className="signup-email">
-                        <input type="email" placeholder='Email' onChange={e => setEmail(e.target.value)} value={email} />
+                        <input 
+                            required={true}
+                            type="email" placeholder='Email' onChange={e => setEmail(e.target.value)} value={email} 
+                        />
                     </div>
                     <div className="signup-password">
-                        <input type="password" placeholder='Password' onChange={e => setPassword(e.target.value)} value={password} />
+                        <input 
+                            required={true}
+                            type="password" placeholder='Password' onChange={e => setPassword(e.target.value)} value={password} 
+                        />
                     </div>
                     <div className="signup-login-link">
                         <Link to='/login'><p>already have an account?</p></Link>
