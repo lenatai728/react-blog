@@ -1,0 +1,22 @@
+name: Deploy to Firebase
+
+on:
+  push:
+    branches:
+      - main  # Or your main branch name
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm install
+      - name: Build the app
+        run: npm run build
+      - name: Deploy to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          cwd: build
+          projectId: react-blog-4d7f0
+          authToken: ${{ secrets.FIREBASE_TOKEN }}
